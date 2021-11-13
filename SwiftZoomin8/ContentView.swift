@@ -6,6 +6,11 @@ struct ContentView: View {
         NavigationView {
             List {
                 NavigationLink {
+                    UserView(id: 1234)
+                } label: {
+                    Text("SwiftUI User View")
+                }
+                NavigationLink {
                     AnyUIViewControllerRepresentable(
                         make: { _ in UserViewController(id: 1234) },
                         update: { _, _ in }
