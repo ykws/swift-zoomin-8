@@ -21,21 +21,25 @@ final class UserViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        state
-            .$user
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] user in
-                self?.nameLabel.text = user?.name
-            }
-            .store(in: &cancellables)
+        // actor の property は await で呼ぶ必要があり
+        // await を呼ぶために Task を利用する
+        Task {
+            await state
+                .$user
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] user in
+                    self?.nameLabel.text = user?.name
+                }
+                .store(in: &cancellables)
 
-        state
-            .$iconImage
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] iconImage in
-                self?.iconImageView.image = iconImage
-            }
-            .store(in: &cancellables)
+            await state
+                .$iconImage
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] iconImage in
+                    self?.iconImageView.image = iconImage
+                }
+                .store(in: &cancellables)
+        }
 
         // レイアウト
         iconImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -66,3 +70,6 @@ final class UserViewController: UIViewController {
         }
     }
 }
+
+// 警告を消すための暫定対応
+extension Published.Publisher: @unchecked Sendable {}
