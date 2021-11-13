@@ -3,7 +3,7 @@ import Foundation
 
 import class UIKit.UIImage
 
-@MainActor final class UserViewState {
+@MainActor final class UserViewState: ObservableObject {
     let id: User.ID
     
     @Published private(set) var user: User?

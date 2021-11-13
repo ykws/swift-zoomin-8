@@ -44,31 +44,20 @@ import Combine
 
         // View への反映
         
-        // Task が複数あるので User 向けのスコープ
-        do {
-            // actor の property は await で呼ぶ必要があり
-            // await を呼ぶために Task を利用する
-            let task = Task { [weak self] in
-                guard let state = self?.state else { return }
-                for await user in state.$user.values {
-                    guard let self = self else { return }
-                    self.nameLabel.text = user?.name
-                }
+        // actor の property は await で呼ぶ必要があり
+        // await を呼ぶために Task を利用する
+        let task = Task { [weak self] in
+            guard let state = self?.state else { return }
+            // UserViewState が ObservableObect に適合しているので objectWillChange でまとめて購読できる
+            for await _ in state.objectWillChange.values {
+                guard let self = self else { return }
+                // 片方が更新されても両方更新が走るので、 View によっては注意が必要
+                // await しているので willChange で発火し、反映する時は didChange 後の値となる想定
+                self.nameLabel.text = state.user?.name
+                self.iconImageView.image = state.iconImage
             }
-            cancellables.insert(.init { task.cancel() })
         }
-
-        // Task が複数あるので IconImage 向けのスコープ
-        do {
-            let task = Task { [weak self] in
-                guard let state = self?.state else { return }
-                for await iconImage in state.$iconImage.values {
-                    guard let self = self else { return }
-                    self.iconImageView.image = iconImage
-                }
-            }
-            cancellables.insert(.init { task.cancel() })
-        }
+        cancellables.insert(.init { task.cancel() })
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -80,6 +69,4 @@ import Combine
     }
 }
 
-// 警告を消すための暫定対応
-extension Published.Publisher: @unchecked Sendable where Output : Sendable {}
 extension UIImage: @unchecked Sendable {}
