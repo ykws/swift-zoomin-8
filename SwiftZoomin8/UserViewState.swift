@@ -42,3 +42,5 @@ actor UserViewState {
         }
     }
 }
+
+extension URL: @unchecked Sendable {}

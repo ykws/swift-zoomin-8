@@ -21,24 +21,30 @@ final class UserViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // actor の property は await で呼ぶ必要があり
-        // await を呼ぶために Task を利用する
-        Task {
-            await state
-                .$user
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] user in
-                    self?.nameLabel.text = user?.name
+        // Task が複数あるので User 向けのスコープ
+        do {
+            // actor の property は await で呼ぶ必要があり
+            // await を呼ぶために Task を利用する
+            let task = Task { [weak self] in
+                guard let state = self?.state else { return }
+                for await user in await state.$user.values {
+                    guard let self = self else { return }
+                    self.nameLabel.text = user?.name
                 }
-                .store(in: &cancellables)
+            }
+            cancellables.insert(.init { task.cancel() })
+        }
 
-            await state
-                .$iconImage
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] iconImage in
-                    self?.iconImageView.image = iconImage
+        // Task が複数あるので IconImage 向けのスコープ
+        do {
+            let task = Task { [weak self] in
+                guard let state = self?.state else { return }
+                for await iconImage in await state.$iconImage.values {
+                    guard let self = self else { return }
+                    self.iconImageView.image = iconImage
                 }
-                .store(in: &cancellables)
+            }
+            cancellables.insert(.init { task.cancel() })
         }
 
         // レイアウト
@@ -72,4 +78,5 @@ final class UserViewController: UIViewController {
 }
 
 // 警告を消すための暫定対応
-extension Published.Publisher: @unchecked Sendable {}
+extension Published.Publisher: @unchecked Sendable where Output : Sendable {}
+extension UIImage: @unchecked Sendable {}
