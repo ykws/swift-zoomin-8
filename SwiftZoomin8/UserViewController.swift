@@ -20,6 +20,28 @@ final class UserViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        // レイアウト
+        iconImageView.translatesAutoresizingMaskIntoConstraints = false
+        iconImageView.layer.cornerRadius = 40
+        iconImageView.layer.borderWidth = 4
+        iconImageView.layer.borderColor = UIColor.systemGray3.cgColor
+        iconImageView.clipsToBounds = true
+        view.addSubview(iconImageView)
+        
+        nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(nameLabel)
+        
+        NSLayoutConstraint.activate([
+            iconImageView.widthAnchor.constraint(equalToConstant: 80),
+            iconImageView.heightAnchor.constraint(equalToConstant: 80),
+            iconImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            iconImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            nameLabel.centerXAnchor.constraint(equalTo: iconImageView.centerXAnchor),
+            nameLabel.topAnchor.constraint(equalTo: iconImageView.bottomAnchor, constant: 16),
+        ])
+
+        // View への反映
         
         // Task が複数あるので User 向けのスコープ
         do {
@@ -46,26 +68,6 @@ final class UserViewController: UIViewController {
             }
             cancellables.insert(.init { task.cancel() })
         }
-
-        // レイアウト
-        iconImageView.translatesAutoresizingMaskIntoConstraints = false
-        iconImageView.layer.cornerRadius = 40
-        iconImageView.layer.borderWidth = 4
-        iconImageView.layer.borderColor = UIColor.systemGray3.cgColor
-        iconImageView.clipsToBounds = true
-        view.addSubview(iconImageView)
-        
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(nameLabel)
-        
-        NSLayoutConstraint.activate([
-            iconImageView.widthAnchor.constraint(equalToConstant: 80),
-            iconImageView.heightAnchor.constraint(equalToConstant: 80),
-            iconImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            iconImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            nameLabel.centerXAnchor.constraint(equalTo: iconImageView.centerXAnchor),
-            nameLabel.topAnchor.constraint(equalTo: iconImageView.bottomAnchor, constant: 16),
-        ])
     }
     
     override func viewDidAppear(_ animated: Bool) {
