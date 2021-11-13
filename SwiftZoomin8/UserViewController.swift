@@ -1,7 +1,8 @@
 import UIKit
 import Combine
 
-final class UserViewController: UIViewController {
+// UIViewController は Sendable だが Compiler に対して @MainActor することで state の警告が消える
+@MainActor final class UserViewController: UIViewController {
     let state: UserViewState
     
     private let iconImageView: UIImageView = .init()
@@ -49,7 +50,7 @@ final class UserViewController: UIViewController {
             // await を呼ぶために Task を利用する
             let task = Task { [weak self] in
                 guard let state = self?.state else { return }
-                for await user in await state.$user.values {
+                for await user in state.$user.values {
                     guard let self = self else { return }
                     self.nameLabel.text = user?.name
                 }
@@ -61,7 +62,7 @@ final class UserViewController: UIViewController {
         do {
             let task = Task { [weak self] in
                 guard let state = self?.state else { return }
-                for await iconImage in await state.$iconImage.values {
+                for await iconImage in state.$iconImage.values {
                     guard let self = self else { return }
                     self.iconImageView.image = iconImage
                 }
